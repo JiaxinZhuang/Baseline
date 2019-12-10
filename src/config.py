@@ -96,11 +96,14 @@ class Config:
         self.parser.add_argument("--server", default="ls15", type=str,
                                  choices=["ls15", "ls16", "local",
                                           "lab_server"])
+        self.parser.add_argument("--test_input_size", default=224, type=int,
+                                 help="re_size for test")
 
     def _load_customized_setting(self):
         """Load sepcial setting
         """
         self.config["server"] = self.args.server
+        self.config["test_input_size"] = self.args.test_input_size
 
     def _path_suitable_for_server(self):
         """Path suitable for server

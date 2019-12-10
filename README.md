@@ -6,6 +6,8 @@ This repo contains some baseline for public datasets.
 
 ### Requirement
 
+* Python 3.6+
+
 * Cuda 9.2+ or 10.1+
 * Package installed requirement.txt
 
@@ -42,7 +44,7 @@ bash ./scripts/CUB_000.sh
 You can observe logs in three ways
 
 * Standard output.
-* **tail -f ** Logs file, eg. **tail -f 000.log** under saved/logdirs/000/
+* **tail -f** Logs file, eg. **tail -f 000.log** under saved/logdirs/000/
 * Tensorboard, which also placed under saved/logdirs/000/
 
 ### Outputs

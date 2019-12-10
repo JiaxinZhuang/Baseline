@@ -47,6 +47,7 @@ def main():
     re_size = configs_dict["re_size"]
     backbone = configs_dict["backbone"]
     dataset_name = configs_dict["dataset"]
+    test_input_size = configs_dict["test_input_size"]
 
     # init environment and log
     init_environment(seed=seed, cuda_id=cuda_id)
@@ -76,7 +77,7 @@ def main():
         test_transform = transforms.Compose([
             transforms.Resize((re_size, re_size),
                               interpolation=Image.BILINEAR),
-            transforms.CenterCrop(input_size),
+            transforms.CenterCrop(test_input_size),
             transforms.ToTensor(),
             transforms.Normalize(mean, std)
         ])
