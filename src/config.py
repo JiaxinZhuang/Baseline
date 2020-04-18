@@ -7,6 +7,8 @@ Jiaxin Zhuang, lincolnz9511@mail.com
 import sys
 import argparse
 
+from utils.function import str2bool
+
 
 class Config:
     """Config.
@@ -36,7 +38,8 @@ class Config:
         self.parser.add_argument("--num_workers", default=6, type=int,
                                  help="num_workers of dataloader")
         self.parser.add_argument('--dataset', default="CUB", type=str,
-                                 choices=["CUB"],
+                                 choices=["CUB", "cifar10", "cifar100",
+                                          "mnist", "SVHN"],
                                  help="dataset name")
         self.parser.add_argument('--learning_rate', default=0.01, type=float,
                                  help="lr")
@@ -55,7 +58,7 @@ class Config:
                                  choices=["Adam", "SGD"],
                                  help="SGD or Adam.")
         self.parser.add_argument("--backbone", default="ResNet50", type=str,
-                                 choices=["ResNet50"],
+                                 choices=["ResNet50", "NIN"],
                                  help="backbone for model")
         self.parser.add_argument("--input_size", default=224, type=int,
                                  help="image input size for model")
@@ -68,6 +71,9 @@ class Config:
         self.parser.add_argument('--log_dir', default="./saved/logdirs/",
                                  type=str, help='store tensorboard files, \
                                  None means not to store')
+        # data
+        self.parser.add_argument("--data_dir", default="./data",
+                                 type=str, help="data directory.")
 
     def _load_common_setting(self):
         """Load default setting from Parser
@@ -89,6 +95,7 @@ class Config:
 
         self.config['log_dir'] = self.args.log_dir
         self.config['model_dir'] = self.args.model_dir
+        self.config["data_dir"] = self.args.data_dir
 
     def _add_customized_setting(self):
         """Add customized setting
@@ -98,22 +105,32 @@ class Config:
                                           "lab_server"])
         self.parser.add_argument("--test_input_size", default=224, type=int,
                                  help="re_size for test")
+        self.parser.add_argument("--bilinear", default=False, type=str2bool,
+                                 help="str to bool")
 
     def _load_customized_setting(self):
         """Load sepcial setting
         """
         self.config["server"] = self.args.server
         self.config["test_input_size"] = self.args.test_input_size
+        self.config["bilinear"] = self.args.bilinear
 
     def _path_suitable_for_server(self):
         """Path suitable for server
         """
         if self.config["server"] == "local":
-            self.config["log_dir"] = "/media/lincolnzjx/Disk2/saved/logdirs"
-            self.config["model_dir"] = "/media/lincolnzjx/Disk2/saved/models"
+            self.config["log_dir"] = "/media/lincolnzjx/HardDisk/myGithub/Baseline/saved/logdirs"
+            self.config["model_dir"] = "/media/lincolnzjx/HardDisk/myGithub/Baseline/saved/models"
+            self.config["data_dir"] = "/media/lincolnzjx/HardDisk/Datasets"
         elif self.config["server"] in ["ls15", "ls16", "lab_center"]:
             self.config["log_dir"] = "./saved/logdirs"
             self.config["model_dir"] = "./saved/models"
+            if self.config["server"] == "ls15":
+                self.config["data_dir"] = "/data15/Public/Datasets/"
+            elif self.config["server"] == "ls16":
+                self.config["data_dir"] = "/data16/Public/Datasets/"
+            else:
+                self.config["data_dir"] = "/data/Public/Datasets/"
         else:
             print("Valid path for server need!")
             sys.exit(-1)

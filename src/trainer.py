@@ -12,6 +12,7 @@ from torch.utils.tensorboard import SummaryWriter
 import torch.optim as optim
 import numpy as np
 from torchvision import transforms
+from torchvision.datasets import CIFAR10, CIFAR100, MNIST, SVHN
 from PIL import Image
 
 from sklearn.metrics import balanced_accuracy_score
@@ -48,6 +49,8 @@ def main():
     backbone = configs_dict["backbone"]
     dataset_name = configs_dict["dataset"]
     test_input_size = configs_dict["test_input_size"]
+    bilinear = configs_dict["bilinear"]
+    data_dir = configs_dict["data_dir"]
 
     # init environment and log
     init_environment(seed=seed, cuda_id=cuda_id)
@@ -81,24 +84,153 @@ def main():
             transforms.ToTensor(),
             transforms.Normalize(mean, std)
         ])
-        trainset = dataset.CUB(root="./data/", train=True,
+        trainset = dataset.CUB(root=data_dir, train=True,
                                transform=train_transform)
         trainloader = torch.utils.data.DataLoader(trainset,
                                                   batch_size=batch_size,
                                                   shuffle=True,
                                                   pin_memory=True,
                                                   num_workers=num_workers)
-        valset = dataset.CUB(root="./data/", train=False,
+        valset = dataset.CUB(root=data_dir, train=False,
                              transform=test_transform)
         valloader = torch.utils.data.DataLoader(valset, batch_size=batch_size,
                                                 shuffle=False, pin_memory=True,
                                                 num_workers=num_workers)
+    elif dataset_name == "cifar10":
+        num_classes = 10
+        mean = [0.489, 0.478, 0.446]
+        std = [0.249, 0.245, 0.263]
+        train_transform = transforms.Compose([
+            transforms.Resize((re_size, re_size),
+                              interpolation=Image.BILINEAR),
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomCrop(input_size),
+            transforms.ToTensor(),
+            transforms.Normalize(mean, std)
+        ])
+        test_transform = transforms.Compose([
+            transforms.Resize((re_size, re_size),
+                              interpolation=Image.BILINEAR),
+            transforms.CenterCrop(test_input_size),
+            transforms.ToTensor(),
+            transforms.Normalize(mean, std)
+        ])
+        trainset = CIFAR10(root=data_dir,
+                           train=True, transform=train_transform)
+        trainloader = torch.utils.data.DataLoader(trainset,
+                                                  batch_size=batch_size,
+                                                  shuffle=True,
+                                                  pin_memory=True,
+                                                  num_workers=num_workers)
+        valset = CIFAR10(root=data_dir,
+                         train=False, transform=test_transform)
+        valloader = torch.utils.data.DataLoader(valset, batch_size=batch_size,
+                                                shuffle=False, pin_memory=True,
+                                                num_workers=num_workers)
+    elif dataset_name == "cifar100":
+        num_classes = 100
+        mean = [0.508, 0.478, 0.434]
+        std = [0.264, 0.252, 0.275]
+        train_transform = transforms.Compose([
+            transforms.Resize((re_size, re_size),
+                              interpolation=Image.BILINEAR),
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomCrop(input_size),
+            transforms.ToTensor(),
+            transforms.Normalize(mean, std)
+        ])
+        test_transform = transforms.Compose([
+            transforms.Resize((re_size, re_size),
+                              interpolation=Image.BILINEAR),
+            transforms.CenterCrop(test_input_size),
+            transforms.ToTensor(),
+            transforms.Normalize(mean, std)
+        ])
+        trainset = CIFAR100(root=data_dir,
+                            train=True, transform=train_transform)
+        trainloader = torch.utils.data.DataLoader(trainset,
+                                                  batch_size=batch_size,
+                                                  shuffle=True,
+                                                  pin_memory=True,
+                                                  num_workers=num_workers)
+        valset = CIFAR100(root=data_dir,
+                          train=False, transform=test_transform)
+        valloader = torch.utils.data.DataLoader(valset, batch_size=batch_size,
+                                                shuffle=False, pin_memory=True,
+                                                num_workers=num_workers)
+    elif dataset_name == "SVHN":
+        num_classes = 10
+        mean = [0.444, 0.450, 0.478]
+        std = [0.196, 0.198, 0.194]
+        train_transform = transforms.Compose([
+            transforms.Resize((re_size, re_size),
+                              interpolation=Image.BILINEAR),
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomCrop(input_size),
+            transforms.ToTensor(),
+            transforms.Normalize(mean, std)
+        ])
+        test_transform = transforms.Compose([
+            transforms.Resize((re_size, re_size),
+                              interpolation=Image.BILINEAR),
+            transforms.CenterCrop(test_input_size),
+            transforms.ToTensor(),
+            transforms.Normalize(mean, std)
+        ])
+        data_dir = os.path.join(data_dir, "SVHN")
+        trainset = SVHN(root=data_dir, split="train",
+                        transform=train_transform)
+        trainloader = torch.utils.data.DataLoader(trainset,
+                                                  batch_size=batch_size,
+                                                  shuffle=True,
+                                                  pin_memory=True,
+                                                  num_workers=num_workers)
+        valset = SVHN(root=data_dir,
+                      split="test", transform=test_transform)
+        valloader = torch.utils.data.DataLoader(valset, batch_size=batch_size,
+                                                shuffle=False, pin_memory=True,
+                                                num_workers=num_workers)
+    elif dataset_name == "mnist":
+        num_classes = 10
+        mean = [0.127]
+        std = [0.304]
+        train_transform = transforms.Compose([
+            transforms.Resize((re_size, re_size),
+                              interpolation=Image.BILINEAR),
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomCrop(input_size),
+            transforms.ToTensor(),
+            transforms.Normalize(mean, std)
+        ])
+        test_transform = transforms.Compose([
+            transforms.Resize((re_size, re_size),
+                              interpolation=Image.BILINEAR),
+            transforms.CenterCrop(test_input_size),
+            transforms.ToTensor(),
+            transforms.Normalize(mean, std)
+        ])
+        trainset = MNIST(root=data_dir, train=True,
+                         transform=train_transform)
+        trainloader = torch.utils.data.DataLoader(trainset,
+                                                  batch_size=batch_size,
+                                                  shuffle=True,
+                                                  pin_memory=True,
+                                                  num_workers=num_workers)
+        valset = MNIST(root=data_dir, train=False,
+                       transform=test_transform)
+        valloader = torch.utils.data.DataLoader(valset, batch_size=batch_size,
+                                                shuffle=False, pin_memory=True,
+                                                num_workers=num_workers)
+
     else:
         _print("Need dataset")
         sys.exit(-1)
 
+    input_channel = len(mean)
+
     # define model
-    net = model.Network(backbone=backbone, num_classes=num_classes,
+    net = model.Network(backbone=backbone, input_channel=input_channel,
+                        num_classes=num_classes, bilinear=bilinear,
                         _print=_print)
     net = net.cuda()
     net.print_model()
@@ -127,7 +259,6 @@ def main():
         net.load_state_dict(ckpt)
         start_epoch = resume + 1
 
-    # desc = "Exp-{}-Train".format(exp)
     # whole Train process
     for epoch in range(start_epoch, n_epochs):
         net.train()
@@ -140,7 +271,7 @@ def main():
             loss.backward()
             optimizer.step()
             losses.append(loss.item())
-        del data, targets
+            del data, targets, embeddings
 
         train_avg_loss = np.mean(losses)
         if scheduler:
@@ -175,9 +306,12 @@ def main():
 
                 y_pred = []
                 y_true = []
+                losses = []
                 for _, (data, targets) in enumerate(valloader):
-                    data = data.cuda()
+                    data, targets = data.cuda(), targets.cuda()
                     embeddings = net(data)
+                    loss = criterion(embeddings, targets)
+                    losses.append(loss.item())
                     pred = torch.argmax(embeddings, dim=1).cpu().data.numpy().\
                         tolist()
                     true = (targets.cpu().data.numpy()).tolist()
@@ -187,9 +321,11 @@ def main():
                 acc = accuracy_score(y_true, y_pred)
                 mca = balanced_accuracy_score(y_true, y_pred)
                 mcp = average_precision(y_true, y_pred)
+                val_avg_loss = np.mean(losses)
                 writer.add_scalar("Metric/Val_Acc", acc, epoch)
                 writer.add_scalar("Metric/Val_Mca", mca, epoch)
                 writer.add_scalar("Metric/Val_Mcp", mcp, epoch)
+                writer.add_scalar("Loss/val/", val_avg_loss, epoch)
                 _print("Epoch:{} - val acc: {:.4f}, mca: {:.4f}, mcp: {:.4f}".
                        format(epoch, acc, mca, mcp))
                 # save model

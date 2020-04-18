@@ -75,3 +75,16 @@ def timethis(func, *args, **kwargs):
 def get_lr(optimizer):
     for param_group in optimizer.param_groups:
         return param_group['lr']
+
+
+def str2bool(val):
+    """convert str to bool
+    """
+    value = None
+    if val == 'True':
+        value = True
+    elif val == 'False':
+        value = False
+    else:
+        raise ValueError
+    return value

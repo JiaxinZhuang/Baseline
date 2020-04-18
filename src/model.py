@@ -6,22 +6,40 @@
 
 import sys
 import torch.nn as nn
-import torchvision
 from torchsummary import summary
+
+from models.NIN import NIN
+from models.ResNet import ResNet50
 
 
 class Network(nn.Module):
     """Network interface.
     """
-    def __init__(self, backbone="ResNet50", num_classes=200, pretrained=True,
+    def __init__(self, backbone="ResNet50", input_channel=3,
+                 num_classes=200, pretrained=True, bilinear=False,
                  _print=None):
         super(Network, self).__init__()
         self._print = _print if _print is not None else print
+        self.input_channel = input_channel
         if backbone == "ResNet50":
             self._print("Backbone: {}, with pretrained {}".format(backbone,
                                                                   pretrained))
             self.model = ResNet50(num_classes=num_classes,
-                                  pretrained=pretrained)
+                                  input_channel=input_channel,
+                                  pretrained=pretrained, bilinear=bilinear)
+        elif backbone == "NIN":
+            self._print("Backbone: {}, with pretrained {}".format(backbone,
+                                                                  pretrained))
+            self.model = NIN(num_classes=num_classes,
+                             input_channel=input_channel,
+                             bilinear=bilinear)
+        # elif backbone == "vgg16":
+        #     self._print("Backbone: {}, with pretrained {}".format(backbone,
+        #                                                           pretrained))
+        #     self.model = torchvision.models.vgg16(pretrained=pretrained)
+        #     self.model = (num_classes=num_classes,
+        #                           input_channel=input_channel,
+        #                           pretrained=pretrained, bilinear=bilinear)
         else:
             self._print("Need valid model backbone.")
             sys.exit(-1)
@@ -32,31 +50,13 @@ class Network(nn.Module):
     def print_model(self):
         """Print model here. Default input is 224 x 224 x 3
         """
-        input_size = (3, 224, 224)
+        input_size = (self.input_channel, 224, 224)
         summary(self.model, input_size)
 
 
-class ResNet50(nn.Module):
-    """ResNet50.
-        Modify renset50 here.
-    """
-    def __init__(self, num_classes, pretrained):
-        super(ResNet50, self).__init__()
-        model = torchvision.models.resnet50(pretrained=pretrained)
-        self.features = nn.Sequential(
-            *list(model.children())[:-2]
-        )
-        self.avgpool = model.avgpool
-        self.classifier = nn.Linear(model.inplanes, num_classes)
-
-    def forward(self, inputs):
-        out = self.features(inputs)
-        out = self.avgpool(out)
-        out = out.view(out.size(0), -1)
-        out = self.classifier(out)
-        return out
-
-
 if __name__ == "__main__":
-    model = Network(backbone="ResNet50", num_classes=200, pretrained=True)
+    model = Network(backbone="ResNet50", num_classes=200,
+                    pretrained=True).cuda()
+    model.print_model()
+    model = Network(backbone="NIN", num_classes=10).cuda()
     model.print_model()
